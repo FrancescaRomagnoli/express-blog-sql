@@ -106,16 +106,28 @@ function modify(req, res) {
 // # destroy
 
 function destroy(req, res) {
-  // const id = parseInt(req.params.id);
-  // const post = postsList.find((post) => post.id === id);
-  // // error
-  // if (!post) {
-  //   return res.status(404).json({ error: "not found" });
-  // }
-  // const postId = postsList.indexOf(post);
-  // postsList.splice(postId, 1);
-  // res.status(204).json();
-  // return console.log(postsList);
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    const err = new Error("Id not found");
+    err.status = 400;
+    throw err;
+  }
+
+  const sql = "DELETE FROM posts WHERE id = ?";
+
+  connection.query(sql, [id], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.status(400).json({ error: "Failed to delete post" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    res.sendStatus(204);
+  });
 }
 
 module.exports = { index, show, store, update, modify, destroy };
