@@ -21,6 +21,11 @@ function show(req, res) {
   const sql = "SELECT * FROM posts WHERE id = ?";
 
   connection.query(sql, [id], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Failed to load post" });
+    }
+
     if (results.length === 0) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -28,17 +33,17 @@ function show(req, res) {
     let post = results[0];
 
     const sqlTags = `
-    SELECT * 
+    SELECT tags.label 
     FROM tags
     INNER JOIN post_tag
     ON tags.id = tag_id
-    WHERE id = ?;
+    WHERE post_tag.post_id = ?;
     `;
 
     connection.query(sqlTags, [id], (err, resultsTags) => {
       console.log(resultsTags);
 
-      post.tags = resultsTags;
+      post.tags = resultsTags.map((tag) => tag.label);
 
       res.json(post);
     });
