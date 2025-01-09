@@ -25,9 +25,23 @@ function show(req, res) {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    let posts = results[0];
+    let post = results[0];
 
-    res.json(posts);
+    const sqlTags = `
+    SELECT * 
+    FROM tags
+    INNER JOIN post_tag
+    ON tags.id = tag_id
+    WHERE id = ?;
+    `;
+
+    connection.query(sqlTags, [id], (err, resultsTags) => {
+      console.log(resultsTags);
+
+      post.tags = resultsTags;
+
+      res.json(post);
+    });
   });
 }
 
